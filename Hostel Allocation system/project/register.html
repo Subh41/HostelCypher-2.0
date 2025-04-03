@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYZ HOSTEL - Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        label {
+            margin-bottom: 0.5rem;
+            color: #555;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .password-container {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            z-index: 1;
+        }
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        .strength-weak {
+            background-color: #f44336;
+            width: 33%;
+        }
+        .strength-medium {
+            background-color: #ffa726;
+            width: 66%;
+        }
+        .strength-strong {
+            background-color: #4caf50;
+            width: 100%;
+        }
+        button {
+            padding: 0.75rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #message {
+            margin-top: 1rem;
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: 4px;
+            display: none;
+        }
+        #message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+        #message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .login-link a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>XYZ HOSTEL Registration</h1>
+        <form id="registerForm">
+            <input type="hidden" name="csrf_token" id="csrf_token">
+            
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required minlength="3" maxlength="30" pattern="[a-zA-Z0-9_-]+" title="Username can only contain letters, numbers, underscores and hyphens">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" required minlength="8">
+                    <i class="password-toggle fas fa-eye" onclick="togglePassword('password')"></i>
+                </div>
+                <div class="password-strength" id="passwordStrength"></div>
+                <div class="password-requirements">
+                    Password must be at least 8 characters long and contain:
+                    <ul>
+                        <li id="lengthCheck">✗ 8 or more characters</li>
+                        <li id="upperCheck">✗ At least one uppercase letter</li>
+                        <li id="lowerCheck">✗ At least one lowercase letter</li>
+                        <li id="numberCheck">✗ At least one number</li>
+                        <li id="specialCheck">✗ At least one special character</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <div class="password-container">
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <i class="password-toggle fas fa-eye" onclick="togglePassword('confirmPassword')"></i>
+                </div>
+            </div>
+            
+            <button type="submit">Register</button>
+        </form>
+        <div id="message"></div>
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login here</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            const lengthCheck = password.length >= 8;
+            const upperCheck = /[A-Z]/.test(password);
+            const lowerCheck = /[a-z]/.test(password);
+            const numberCheck = /[0-9]/.test(password);
+            const specialCheck = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            document.getElementById('lengthCheck').innerHTML = 
+                `${lengthCheck ? '✓' : '✗'} 8 or more characters`;
+            document.getElementById('upperCheck').innerHTML = 
+                `${upperCheck ? '✓' : '✗'} At least one uppercase letter`;
+            document.getElementById('lowerCheck').innerHTML = 
+                `${lowerCheck ? '✓' : '✗'} At least one lowercase letter`;
+            document.getElementById('numberCheck').innerHTML = 
+                `${numberCheck ? '✓' : '✗'} At least one number`;
+            document.getElementById('specialCheck').innerHTML = 
+                `${specialCheck ? '✓' : '✗'} At least one special character`;
+            
+            const strength = document.getElementById('passwordStrength');
+            const checks = [lengthCheck, upperCheck, lowerCheck, numberCheck, specialCheck];
+            const passedChecks = checks.filter(check => check).length;
+            
+            if (passedChecks <= 2) {
+                strength.className = 'password-strength strength-weak';
+            } else if (passedChecks <= 4) {
+                strength.className = 'password-strength strength-medium';
+            } else {
+                strength.className = 'password-strength strength-strong';
+            }
+        }
+
+        document.getElementById('password').addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+        });
+
+        // Get CSRF token
+        fetch('get_csrf_token.php')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('csrf_token').value = data.token;
+            });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageDiv = document.getElementById('message');
+            
+            if (password !== confirmPassword) {
+                messageDiv.textContent = 'Passwords do not match';
+                messageDiv.className = 'error';
+                return;
+            }
+            
+            const formData = new FormData(this);
+            
+            fetch('register.php', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'  // Include cookies in the request
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                messageDiv.textContent = data.message;
+                messageDiv.className = data.success ? 'success' : 'error';
+                
+                if (data.success) {
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    // If registration failed due to CSRF token, try to get a new one
+                    if (data.message.includes('security token')) {
+                        fetch('get_csrf_token.php')
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('csrf_token').value = data.token;
+                            });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.textContent = 'An error occurred. Please try again.';
+                messageDiv.className = 'error';
+                
+                // Try to get a new CSRF token
+                fetch('get_csrf_token.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('csrf_token').value = data.token;
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
